@@ -7,29 +7,26 @@ pragma solidity ^0.8.11;
  
  contract ALLOWANCE {
 
-   event AllowanceInfo( address indexed _forwho, address indexed _fromwhom, uint _oldAmount, uint _newAmount );
+          event AllowanceInfo( address indexed _forwho, address indexed _fromwhom, uint _oldAmount, uint _newAmount );
 
-   address public owner;
-   
-   mapping (address => uint256) public allowance;
+          address public owner;
+
+          mapping (address => uint256) public allowance;
     
-    function addAllowance( address payable _to_who , uint _amount ) payable public {
+          function addAllowance( address payable _to_who , uint _amount ) payable public {
     
+                require (owner == msg.sender, " u are not the owner");
 
-   require (owner == msg.sender, " u are not the owner");
+                emit AllowanceInfo (_to_who, msg.sender, allowance[_to_who], _amount);
 
-   emit AllowanceInfo (_to_who, msg.sender, allowance[_to_who], _amount);
+                allowance[_to_who] = _amount;
   
-  allowance[_to_who] = _amount;
-  
-  }
+         }
  
- function AllowanceBalance( ) public view returns(uint)
+          function AllowanceBalance( ) public view returns(uint) {
  
- {
- 
-    return allowance[msg.sender];
- }
+                return allowance[msg.sender];
+         }
 
 }
 
@@ -37,47 +34,47 @@ pragma solidity ^0.8.11;
 
 
 
-  contract Udon is ALLOWANCE {
+ contract Udon is ALLOWANCE {
 
- event MoneySpent( address indexed _Beneficiary, address indexed _payer, uint256 _GoneAmount);
+           event MoneySpent( address indexed _Beneficiary, address indexed _payer, uint256 _GoneAmount);
 
- constructor (){
- 
- owner = msg.sender;
- 
- }
+           constructor (){
 
-  function sendFunds() public payable {} 
+           owner = msg.sender;
 
-  function getbalance() public view returns(uint256) {
+           }
 
-  return address(this).balance;  
+            function sendFunds() public payable {} 
 
-  }
+            function getbalance() public view returns(uint256) {
 
- function withdrawFunds( address payable _to , uint _amount) public payable  {
-   
-   require (owner == msg.sender || allowance[msg.sender] >= _amount, "either you are not the owner or the funds are too high");
+                    return address(this).balance;  
 
-   require ( _amount <= address(this).balance, "you dont have any funds in smart contract");
+            }
 
-   emit MoneySpent( _to ,msg.sender, _amount);
+           function withdrawFunds( address payable _to , uint _amount) public payable  {
 
-   _to.transfer(_amount);
+                    require (owner == msg.sender || allowance[msg.sender] >= _amount, "either you are not the owner or the funds are too high");
 
-  if (msg.sender == owner) {
+                    require ( _amount <= address(this).balance, "you dont have any funds in smart contract");
 
-     AllowanceBalance();
+              emit MoneySpent( _to ,msg.sender, _amount);
 
-  }
+                    _to.transfer(_amount);
 
-  else {
+              if (msg.sender == owner) {
 
-  allowance[msg.sender] -= _amount;
-
-   AllowanceBalance();
+                      AllowanceBalance();
 
   }
+
+             else {
+
+             allowance[msg.sender] -= _amount;
+
+              AllowanceBalance();
+
+             }
 
  }
 
